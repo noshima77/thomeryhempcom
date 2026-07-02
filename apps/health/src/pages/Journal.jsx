@@ -30,11 +30,8 @@ export default function Journal() {
     };
   });
 
-  const setField = (k, v) =>
-    setForm(f => ({ ...f, [k]: v }));
-
-  const setRep = (id, v) =>
-    setForm(f => ({ ...f, reps: { ...f.reps, [id]: v } }));
+  const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const setRep = (id, v) => setForm(f => ({ ...f, reps: { ...f.reps, [id]: v } }));
 
   const handleSave = () => {
     setEntries(prev => {
@@ -50,121 +47,108 @@ export default function Journal() {
     setTimeout(() => setSaved(false), 2500);
   };
 
+  const inputCls = "w-full bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 font-mono text-base px-3.5 py-3 outline-none focus:border-green-500 transition-colors placeholder:text-neutral-500";
+  const labelCls = "block font-mono text-xs text-neutral-500 tracking-wide uppercase mb-1.5";
+
   return (
-    <div className="page">
-      <p className="page-subtitle">Suivi personnel</p>
-      <h1 className="page-title">Journal<br /><span className="text-accent">de bord</span></h1>
+    <div className="max-w-[480px] mx-auto px-4 pt-6 pb-24 animate-fade-up">
+      <p className="font-mono text-xs text-neutral-500 tracking-wide uppercase mb-1">Suivi personnel</p>
+      <h1 className="font-serif text-3xl leading-none tracking-tight mb-6">
+        Journal<br /><span className="text-green-500">de bord</span>
+      </h1>
 
       {/* Date */}
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div className="form-group" style={{ marginBottom: 0 }}>
-          <label className="form-label">Date de saisie</label>
-          <input
-            type="date"
-            className="form-input"
-            value={form.date}
-            onChange={e => setField("date", e.target.value)}
-          />
-        </div>
+      <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mb-3">
+        <label className={labelCls}>Date de saisie</label>
+        <input type="date" className={inputCls} value={form.date} onChange={e => setField("date", e.target.value)} />
       </div>
 
       {/* Poids */}
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div className="section-label">Poids à jeun</div>
-        <div className="form-group" style={{ marginBottom: 0 }}>
-          <label className="form-label">Poids lundi matin (kg)</label>
-          <input
-            type="number"
-            step="0.1"
-            min="40"
-            max="100"
-            placeholder="54.0"
-            className="form-input"
-            value={form.weight}
-            onChange={e => setField("weight", e.target.value)}
-          />
-        </div>
+      <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mb-3">
+        <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase mb-2.5">Poids à jeun</div>
+        <label className={labelCls}>Poids lundi matin (kg)</label>
+        <input
+          type="number" step="0.1" min="40" max="100" placeholder="54.0"
+          className={inputCls} value={form.weight} onChange={e => setField("weight", e.target.value)}
+        />
       </div>
 
       {/* Reps */}
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div className="section-label">Répétitions réalisées</div>
+      <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mb-3">
+        <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase mb-2.5">Répétitions réalisées</div>
         {EXERCISES.map(ex => (
-          <div className="form-group" key={ex.id}>
-            <label className="form-label">{ex.label}</label>
+          <div className="mb-4 last:mb-0" key={ex.id}>
+            <label className={labelCls}>{ex.label}</label>
             <input
-              type="text"
-              placeholder="ex: 8 / 7 / 6"
-              className="form-input"
-              value={form.reps[ex.id]}
-              onChange={e => setRep(ex.id, e.target.value)}
+              type="text" placeholder="ex: 8 / 7 / 6" className={inputCls}
+              value={form.reps[ex.id]} onChange={e => setRep(ex.id, e.target.value)}
             />
           </div>
         ))}
       </div>
 
       {/* Énergie */}
-      <div className="card" style={{ marginBottom: 12 }}>
-        <div className="section-label">Énergie subjective</div>
-        <div className="rating-row">
+      <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mb-3">
+        <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase mb-2.5">Énergie subjective</div>
+        <div className="flex gap-2.5">
           {[1, 2, 3, 4, 5].map(n => (
             <button
               key={n}
-              className={`rating-btn ${form.energy === n ? "selected" : ""}`}
               onClick={() => setField("energy", n)}
+              className={`flex-1 aspect-square rounded-lg border font-serif text-lg transition-all ${
+                form.energy === n
+                  ? "bg-green-50 border-green-500 text-green-500"
+                  : "bg-neutral-50 border-neutral-200 text-neutral-500"
+              }`}
             >
               {n}
             </button>
           ))}
         </div>
-        <div className="text-muted" style={{ marginTop: 8, fontSize:"0.75rem" }}>
-          1 = épuisé · 5 = au top
-        </div>
+        <div className="text-sm text-neutral-500 mt-2">1 = épuisé · 5 = au top</div>
       </div>
 
       {/* Notes */}
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div className="section-label">Notes libres</div>
+      <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mb-4">
+        <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase mb-2.5">Notes libres</div>
         <textarea
-          className="form-input form-textarea"
+          className={`${inputCls} resize-y min-h-[90px] font-sans text-sm leading-relaxed`}
           placeholder="Ressenti, douleurs, variations, qualité du sommeil..."
           value={form.notes}
           onChange={e => setField("notes", e.target.value)}
         />
       </div>
 
-      <button className="btn btn-primary" onClick={handleSave}>
+      <button
+        className="w-full flex items-center justify-center gap-2 min-h-touch px-6 rounded-lg font-serif text-sm tracking-wide bg-green-500 text-white active:scale-[0.97] active:bg-green-700 transition-all"
+        onClick={handleSave}
+      >
         {saved ? "✓ Sauvegardé !" : "Enregistrer la séance"}
       </button>
 
       {/* Historique court */}
       {entries.length > 0 && (
-        <div style={{ marginTop: 28 }}>
-          <div className="section-label">Dernières entrées</div>
+        <div className="mt-7">
+          <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase mb-2">Dernières entrées</div>
           {[...entries].reverse().slice(0, 4).map(e => (
             <div
               key={e.date}
-              className="card"
-              style={{ marginTop: 8, cursor:"pointer" }}
+              className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mt-2 cursor-pointer"
               onClick={() => setForm(e)}
             >
               <div className="flex items-center justify-between">
-                <span className="text-mono" style={{ fontSize:"0.78rem", color:"var(--text-2)" }}>
+                <span className="font-mono text-sm text-neutral-500">
                   {new Date(e.date + "T12:00:00").toLocaleDateString("fr-FR", { weekday:"short", day:"numeric", month:"short" })}
                 </span>
                 {e.weight && (
-                  <span className="text-accent text-mono" style={{ fontSize:"0.88rem" }}>
-                    {e.weight} kg
-                  </span>
+                  <span className="font-mono text-sm text-green-500">{e.weight} kg</span>
                 )}
                 {e.energy > 0 && (
-                  <span style={{ color:"var(--accent-3)", fontSize:"0.8rem", fontFamily:"var(--font-mono)" }}>
-                    énergie {e.energy}/5
-                  </span>
+                  <span className="font-mono text-sm text-amber-500">énergie {e.energy}/5</span>
                 )}
               </div>
               {e.notes && (
-                <p className="text-muted" style={{ marginTop: 5, fontSize:"0.78rem" }}>
+                <p className="text-sm text-neutral-500 mt-1.5">
                   {e.notes.slice(0, 80)}{e.notes.length > 80 ? "…" : ""}
                 </p>
               )}

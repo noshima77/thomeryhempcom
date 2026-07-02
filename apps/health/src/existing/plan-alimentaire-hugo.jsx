@@ -194,8 +194,6 @@ const budgetItems = [
   { name: "Raisins secs 200g", price: 1.20 },
 ];
 
-const mealColors = ["#3d5a3e", "#8c6a2e", "#5a4a3a"];
-
 export default function MealPlan() {
   const [activeDay, setActiveDay] = useState(0);
   const [showBudget, setShowBudget] = useState(false);
@@ -203,13 +201,13 @@ export default function MealPlan() {
   const total = budgetItems.reduce((s, i) => s + i.price, 0);
 
   return (
-    <div style={{ fontFamily: "Georgia, serif", background: "#f7f3ee", minHeight: "100vh", color: "#2c2416" }}>
-
-      {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #3d5a3e 0%, #5c7a5d 100%)", padding: "22px 18px 18px", color: "white" }}>
-        <div style={{ fontSize: 10, letterSpacing: 3, opacity: 0.65, marginBottom: 5, textTransform: "uppercase" }}>Hugo · 32 ans · 54 kg · IF 18:6</div>
-        <h1 style={{ margin: 0, fontSize: 21, fontWeight: 700, letterSpacing: -0.3 }}>Plan Alimentaire Semaine</h1>
-        <div style={{ marginTop: 10, display: "flex", gap: 14, fontSize: 12, opacity: 0.85, flexWrap: "wrap" }}>
+    <div>
+      {/* Header info rapide */}
+      <div className="bg-green-500 rounded-2xl px-4 py-4 text-white mb-4">
+        <div className="font-mono text-[0.6rem] tracking-widest opacity-70 uppercase mb-1">
+          Hugo · 32 ans · 54 kg · IF 18:6
+        </div>
+        <div className="flex gap-3.5 text-sm opacity-90 flex-wrap">
           <span>🎯 ~2 350 kcal / jour</span>
           <span>💪 ~110 g protéines</span>
           <span>🕑 Fenêtre 12h – 18h</span>
@@ -217,127 +215,125 @@ export default function MealPlan() {
       </div>
 
       {/* Day tabs */}
-      <div style={{ display: "flex", background: "#2c2416", overflowX: "auto" }}>
-        {days.map((d, i) => (
-          <button key={i} onClick={() => setActiveDay(i)} style={{
-            flex: "0 0 auto", padding: "11px 13px", border: "none",
-            background: activeDay === i ? "#c8733a" : "transparent",
-            color: activeDay === i ? "white" : "#a89880",
-            fontFamily: "Georgia, serif", fontSize: 13, cursor: "pointer",
-            fontWeight: activeDay === i ? 700 : 400,
-            borderBottom: activeDay === i ? "3px solid #e8935a" : "3px solid transparent",
-            transition: "all 0.15s"
-          }}>{d.short}</button>
-        ))}
+      <div className="flex bg-neutral-900 rounded-xl overflow-x-auto mb-4">
+        {days.map((d, i) => {
+          const active = activeDay === i;
+          return (
+            <button
+              key={i}
+              onClick={() => setActiveDay(i)}
+              className={`flex-shrink-0 px-3.5 py-2.5 font-serif text-sm transition-all border-b-[3px] ${
+                active
+                  ? "bg-earth-500 text-white font-semibold border-earth-300"
+                  : "text-neutral-500 border-transparent"
+              }`}
+            >
+              {d.short}
+            </button>
+          );
+        })}
       </div>
 
-      <div style={{ padding: "18px 15px" }}>
-
-        {/* Day header + macros */}
-        <div style={{ marginBottom: 18 }}>
-          <h2 style={{ margin: 0, fontSize: 19, color: "#3d5a3e", fontWeight: 700 }}>{day.name}</h2>
-          <div style={{ fontSize: 12, color: "#8c7355", marginTop: 3, fontStyle: "italic" }}>{day.theme}</div>
-          <div style={{ display: "flex", gap: 9, marginTop: 13, flexWrap: "wrap" }}>
-            {[
-              { label: "kcal", value: day.dailyKcal, color: "#c8733a" },
-              { label: "Protéines", value: day.dailyP + "g", color: "#3d5a3e" },
-              { label: "Glucides", value: day.dailyC + "g", color: "#8c6a2e" },
-              { label: "Lipides", value: day.dailyL + "g", color: "#5a7a8c" },
-            ].map(m => (
-              <div key={m.label} style={{
-                background: "white", border: `1px solid ${m.color}30`,
-                borderTop: `3px solid ${m.color}`, borderRadius: 8,
-                padding: "7px 12px", textAlign: "center", minWidth: 58
-              }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: m.color }}>{m.value}</div>
-                <div style={{ fontSize: 9, color: "#8c7355", letterSpacing: 0.8, textTransform: "uppercase", marginTop: 1 }}>{m.label}</div>
-              </div>
-            ))}
-          </div>
+      {/* Day header + macros */}
+      <div className="mb-5">
+        <h2 className="font-serif text-xl text-green-700 font-semibold">{day.name}</h2>
+        <div className="text-sm text-earth-500 mt-0.5 italic">{day.theme}</div>
+        <div className="flex gap-2.5 mt-3.5 flex-wrap">
+          {[
+            { label: "kcal", value: day.dailyKcal, cls: "border-t-earth-500 text-earth-500" },
+            { label: "Protéines", value: day.dailyP + "g", cls: "border-t-green-700 text-green-700" },
+            { label: "Glucides", value: day.dailyC + "g", cls: "border-t-earth-700 text-earth-700" },
+            { label: "Lipides", value: day.dailyL + "g", cls: "border-t-[var(--color-info-500)] text-[var(--color-info-500)]" },
+          ].map(m => (
+            <div key={m.label} className={`bg-neutral-0 border border-neutral-200 border-t-[3px] rounded-lg px-3 py-1.5 text-center min-w-[58px] ${m.cls}`}>
+              <div className="text-base font-bold">{m.value}</div>
+              <div className="text-[0.56rem] text-earth-500 tracking-wide uppercase mt-0.5">{m.label}</div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Meals */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {day.meals.map((meal, i) => (
-            <div key={i} style={{ background: "white", borderRadius: 11, overflow: "hidden", boxShadow: "0 2px 8px rgba(44,36,22,0.07)" }}>
-              <div style={{
-                background: mealColors[i], padding: "9px 15px",
-                display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}>
-                <div style={{ color: "white" }}>
-                  <span style={{ fontSize: 10, opacity: 0.65, letterSpacing: 1.2, textTransform: "uppercase" }}>{meal.label}</span>
-                  <span style={{ marginLeft: 10, fontSize: 14, fontWeight: 600 }}>{meal.time}</span>
+      {/* Meals */}
+      <div className="flex flex-col gap-3">
+        {day.meals.map((meal, i) => {
+          const headerColors = ["bg-green-700", "bg-earth-700", "bg-neutral-800"];
+          return (
+            <div key={i} className="bg-neutral-0 border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
+              <div className={`${headerColors[i]} px-4 py-2.5 flex justify-between items-center`}>
+                <div className="text-white">
+                  <span className="text-[0.6rem] opacity-70 tracking-wide uppercase">{meal.label}</span>
+                  <span className="ml-2.5 text-sm font-semibold">{meal.time}</span>
                 </div>
-                <div style={{ background: "rgba(255,255,255,0.18)", color: "white", fontSize: 11, padding: "3px 10px", borderRadius: 20 }}>
+                <div className="bg-white/20 text-white text-xs px-2.5 py-0.5 rounded-full">
                   ~{meal.kcal} kcal
                 </div>
               </div>
-              <div style={{ padding: "13px 15px" }}>
+              <div className="px-4 py-3.5">
                 {meal.items.map((item, j) => (
-                  <div key={j} style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: j < meal.items.length - 1 ? 7 : 0, fontSize: 14, lineHeight: 1.45 }}>
-                    <span style={{ color: "#c8733a", marginTop: 2, flexShrink: 0 }}>▸</span>
+                  <div key={j} className={`flex items-start gap-2 text-sm leading-relaxed ${j < meal.items.length - 1 ? "mb-1.5" : ""}`}>
+                    <span className="text-earth-500 mt-0.5 flex-shrink-0">▸</span>
                     <span>{item}</span>
                   </div>
                 ))}
-                <div style={{ marginTop: 11, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {[["P", meal.p + "g", "#3d5a3e"], ["G", meal.c + "g", "#8c6a2e"], ["L", meal.l + "g", "#5a7a8c"]].map(([l, v, c]) => (
-                    <span key={l} style={{ fontSize: 11, color: c, background: c + "18", padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>{l} {v}</span>
+                <div className="mt-2.5 flex gap-2 flex-wrap">
+                  {[["P", meal.p + "g", "text-green-700 bg-green-50"], ["G", meal.c + "g", "text-earth-700 bg-earth-100"], ["L", meal.l + "g", "text-[var(--color-info-500)] bg-[var(--color-info-100)]"]].map(([l, v, cls]) => (
+                    <span key={l} className={`text-xs font-bold px-2 py-0.5 rounded ${cls}`}>{l} {v}</span>
                   ))}
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Tip */}
-        <div style={{ marginTop: 14, background: "#fffbf0", border: "1px solid #e8d5a0", borderLeft: "4px solid #c8733a", borderRadius: 8, padding: "11px 14px", fontSize: 13, color: "#5a4020", lineHeight: 1.55 }}>
-          💡 {day.tip}
-        </div>
-
-        {/* Hydration */}
-        <div style={{ marginTop: 12, background: "#eef4f8", border: "1px solid #b8d4e8", borderRadius: 10, padding: "13px 15px", fontSize: 13, color: "#2a4a5a" }}>
-          <div style={{ fontWeight: 700, marginBottom: 7 }}>💧 Protocole hydratation (hors fenêtre)</div>
-          <div style={{ lineHeight: 1.7 }}>
-            <div>▸ <strong>Réveil :</strong> 500 ml eau + pincée sel + jus de citron</div>
-            <div>▸ <strong>Matin (jeûne) :</strong> eau plate, thé ou café noir</div>
-            <div>▸ <strong>Pendant la fenêtre :</strong> 1,5 L supplémentaire minimum</div>
-            <div>▸ <strong>Soir :</strong> tisane ou eau si soif</div>
-          </div>
-        </div>
-
-        {/* Budget toggle */}
-        <button onClick={() => setShowBudget(!showBudget)} style={{
-          marginTop: 18, width: "100%", padding: "13px",
-          background: showBudget ? "#2c2416" : "white",
-          color: showBudget ? "white" : "#2c2416",
-          border: "2px solid #2c2416", borderRadius: 10,
-          fontFamily: "Georgia, serif", fontSize: 14, fontWeight: 700,
-          cursor: "pointer", transition: "all 0.2s"
-        }}>
-          {showBudget ? "▲" : "▼"} Liste de courses semaine — ~{total.toFixed(2)} €
-        </button>
-
-        {showBudget && (
-          <div style={{ background: "white", borderRadius: 10, padding: 15, marginTop: 6, boxShadow: "0 2px 8px rgba(44,36,22,0.07)" }}>
-            <div style={{ fontSize: 11, color: "#8c7355", marginBottom: 11, fontStyle: "italic" }}>Prix estimés grandes surfaces — légumes du jardin non comptés</div>
-            {budgetItems.map((item, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: i < budgetItems.length - 1 ? "1px solid #f0e8dc" : "none", fontSize: 13 }}>
-                <span>{item.name}</span>
-                <span style={{ color: "#c8733a", fontWeight: 700 }}>{item.price.toFixed(2)} €</span>
-              </div>
-            ))}
-            <div style={{ marginTop: 13, padding: "11px 14px", background: "#3d5a3e", borderRadius: 8, display: "flex", justifyContent: "space-between", color: "white" }}>
-              <span style={{ fontWeight: 700 }}>TOTAL SEMAINE</span>
-              <span style={{ fontWeight: 700, fontSize: 17 }}>{total.toFixed(2)} €</span>
-            </div>
-            <div style={{ fontSize: 11, color: "#8c7355", marginTop: 8, fontStyle: "italic" }}>
-              * Épices et condiments basiques (sel, moutarde, etc.) considérés en stock
-            </div>
-          </div>
-        )}
-
-        <div style={{ height: 30 }} />
+          );
+        })}
       </div>
+
+      {/* Tip */}
+      <div className="mt-3.5 bg-earth-50 border border-earth-300 border-l-4 border-l-earth-500 rounded-lg px-3.5 py-2.5 text-sm text-earth-700 leading-relaxed">
+        💡 {day.tip}
+      </div>
+
+      {/* Hydration */}
+      <div className="mt-3 bg-[var(--color-info-100)] border rounded-xl px-4 py-3.5 text-sm text-neutral-800" style={{ borderColor: "var(--color-info-500)" }}>
+        <div className="font-bold mb-1.5">💧 Protocole hydratation (hors fenêtre)</div>
+        <div className="leading-loose">
+          <div>▸ <strong>Réveil :</strong> 500 ml eau + pincée sel + jus de citron</div>
+          <div>▸ <strong>Matin (jeûne) :</strong> eau plate, thé ou café noir</div>
+          <div>▸ <strong>Pendant la fenêtre :</strong> 1,5 L supplémentaire minimum</div>
+          <div>▸ <strong>Soir :</strong> tisane ou eau si soif</div>
+        </div>
+      </div>
+
+      {/* Budget toggle */}
+      <button
+        onClick={() => setShowBudget(!showBudget)}
+        className={`mt-4.5 w-full min-h-touch px-4 rounded-lg font-serif text-sm font-bold border-2 border-neutral-900 transition-all ${
+          showBudget ? "bg-neutral-900 text-white" : "bg-neutral-0 text-neutral-900"
+        }`}
+      >
+        {showBudget ? "▲" : "▼"} Liste de courses semaine — ~{total.toFixed(2)} €
+      </button>
+
+      {showBudget && (
+        <div className="bg-neutral-0 border border-neutral-200 rounded-xl p-4 mt-1.5 shadow-sm">
+          <div className="text-xs text-earth-500 mb-2.5 italic">
+            Prix estimés grandes surfaces — légumes du jardin non comptés
+          </div>
+          {budgetItems.map((item, i) => (
+            <div key={i} className={`flex justify-between py-1.5 text-sm ${i < budgetItems.length - 1 ? "border-b border-neutral-100" : ""}`}>
+              <span>{item.name}</span>
+              <span className="text-earth-500 font-bold">{item.price.toFixed(2)} €</span>
+            </div>
+          ))}
+          <div className="mt-3.5 px-3.5 py-2.5 bg-green-700 rounded-lg flex justify-between text-white">
+            <span className="font-bold">TOTAL SEMAINE</span>
+            <span className="font-bold text-lg">{total.toFixed(2)} €</span>
+          </div>
+          <div className="text-xs text-earth-500 mt-2 italic">
+            * Épices et condiments basiques (sel, moutarde, etc.) considérés en stock
+          </div>
+        </div>
+      )}
+
+      <div className="h-7" />
     </div>
   );
 }

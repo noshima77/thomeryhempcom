@@ -4,10 +4,10 @@ import PlanAlimentaireHugo from "../existing/plan-alimentaire-hugo";
 
 export default function PlanAlimentaire() {
   return (
-    <div className="page" style={{ paddingTop: 24 }}>
-      <p className="page-subtitle">Nutrition · IF 6h</p>
-      <h1 className="page-title" style={{ marginBottom: 24 }}>
-        Plan<br /><span className="text-accent">alimentaire</span>
+    <div className="max-w-[480px] mx-auto px-4 pt-6 pb-24 animate-fade-up">
+      <p className="font-mono text-xs text-neutral-500 tracking-wide uppercase mb-1">Nutrition · IF 6h</p>
+      <h1 className="font-serif text-3xl leading-none tracking-tight mb-6">
+        Plan<br /><span className="text-green-500">alimentaire</span>
       </h1>
       <PlanAlimentaireHugo />
     </div>

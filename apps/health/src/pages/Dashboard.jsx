@@ -4,14 +4,13 @@ import { useStorage } from "../hooks/useStorage";
 /* ─── CONSTANTES ──────────────────────────────────────────────── */
 const TARGET_KG    = 60;
 const START_KG     = 54;
-const IF_START     = 12; // 12h00
-const IF_END       = 18; // 18h00
-const HYDRO_GOAL   = 8;  // verres de 250ml = 2L
+const IF_START     = 12;
+const IF_END       = 18;
+const HYDRO_GOAL   = 8;
 const WEEK_DAYS    = ["L", "M", "M", "J", "V", "S", "D"];
-// Semaine type : Lundi Push, Mardi Pull, Jeudi Legs, Vendredi Full Body
-const TRAINING_DAYS = [0, 1, 3, 4]; // indices lundi=0
+const TRAINING_DAYS = [0, 1, 3, 4];
 
-/* ─── HELPERS ────────────────────────────────────────────────── */
+/* ─── HELPERS (inchangés) ────────────────────────────────────── */
 function getIFStatus() {
   const now  = new Date();
   const h    = now.getHours() + now.getMinutes() / 60;
@@ -28,13 +27,12 @@ function getIFStatus() {
 
 function getWeekNumber() {
   const now  = new Date();
-  const start = new Date(2025, 0, 6); // semaine 1 = 6 jan 2025
+  const start = new Date(2025, 0, 6);
   const diff  = Math.floor((now - start) / (7 * 24 * 3600 * 1000));
   return Math.max(1, Math.min(52, diff + 1));
 }
 
 function getTodayIdx() {
-  // 0=Lundi … 6=Dimanche
   return (new Date().getDay() + 6) % 7;
 }
 
@@ -47,12 +45,12 @@ function progressPct(current, start, target) {
   return Math.min(100, Math.round(((current - start) / (target - start)) * 100));
 }
 
-/* ─── MINI SVG SPARKLINE ─────────────────────────────────────── */
-function Sparkline({ data, color = "var(--accent)", target }) {
+/* ─── SPARKLINE ───────────────────────────────────────────────── */
+function Sparkline({ data, color = "var(--color-green-500)", target }) {
   if (!data || data.length < 2) {
     return (
-      <div className="chart-area" style={{ display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <span className="text-muted text-mono" style={{ fontSize:"0.72rem" }}>
+      <div className="w-full h-[130px] flex items-center justify-center">
+        <span className="font-mono text-xs text-neutral-500">
           — données insuffisantes —
         </span>
       </div>
@@ -72,64 +70,30 @@ function Sparkline({ data, color = "var(--accent)", target }) {
     .join(" ");
 
   const area = `${path} L ${toX(data.length-1).toFixed(1)} ${H} L 0 ${H} Z`;
-
   const targetY = target ? toY(target).toFixed(1) : null;
 
   return (
-    <div className="chart-area">
-      <svg className="chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+    <div className="w-full h-[130px]">
+      <svg className="w-full h-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
         <defs>
           <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%"   stopColor={color} stopOpacity="0.25" />
             <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
-        {/* Zone remplie */}
         <path d={area} fill="url(#sg)" />
-        {/* Ligne */}
         <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        {/* Objectif */}
         {targetY && (
-          <line
-            x1="0" y1={targetY}
-            x2={W} y2={targetY}
-            stroke="var(--text-3)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-          />
+          <line x1="0" y1={targetY} x2={W} y2={targetY} stroke="var(--color-neutral-500)" strokeWidth="1" strokeDasharray="4 4" />
         )}
-        {/* Points */}
         {data.map((d, i) => (
-          <circle
-            key={i}
-            cx={toX(i).toFixed(1)}
-            cy={toY(d.v).toFixed(1)}
-            r="3.5"
-            fill={color}
-            stroke="var(--bg)"
-            strokeWidth="1.5"
-          />
+          <circle key={i} cx={toX(i).toFixed(1)} cy={toY(d.v).toFixed(1)} r="3.5" fill={color} stroke="var(--color-neutral-50)" strokeWidth="1.5" />
         ))}
-        {/* Dernier label */}
-        <text
-          x={toX(data.length-1) - 4}
-          y={toY(data[data.length-1].v) - 8}
-          fill={color}
-          fontSize="10"
-          fontFamily="DM Mono, monospace"
-          textAnchor="end"
-        >
+        <text x={toX(data.length-1) - 4} y={toY(data[data.length-1].v) - 8} fill={color} fontSize="10" fontFamily="DM Mono, monospace" textAnchor="end">
           {data[data.length-1].v} kg
         </text>
         {targetY && (
-          <text
-            x={W - 2}
-            y={parseFloat(targetY) - 4}
-            fill="var(--text-3)"
-            fontSize="9"
-            fontFamily="DM Mono, monospace"
-            textAnchor="end"
-          >
+          <text x={W - 2} y={parseFloat(targetY) - 4} fill="var(--color-neutral-500)" fontSize="9" fontFamily="DM Mono, monospace" textAnchor="end">
             objectif {target}kg
           </text>
         )}
@@ -140,35 +104,29 @@ function Sparkline({ data, color = "var(--accent)", target }) {
 
 /* ─── COMPOSANT PRINCIPAL ────────────────────────────────────── */
 export default function Dashboard({ onNavigate }) {
-  const [journal]       = useStorage("hugo_journal", []);
+  const [journal] = useStorage("hugo_journal", []);
   const [hydro, setHydro] = useStorage("hugo_hydro_today", {
     date: new Date().toDateString(),
     count: 0,
   });
   const [ifStatus, setIfStatus] = useState(getIFStatus());
 
-  /* Réinitialise hydratation chaque nouveau jour */
   useEffect(() => {
     const today = new Date().toDateString();
     if (hydro.date !== today) {
       setHydro({ date: today, count: 0 });
     }
-    // Refresh IF status chaque minute
     const tid = setInterval(() => setIfStatus(getIFStatus()), 60_000);
     return () => clearInterval(tid);
   }, []);
 
-  /* Données poids depuis le journal */
   const weightData = journal
     .filter(e => e.weight)
     .slice(-8)
     .map(e => ({ v: parseFloat(e.weight), label: e.date }));
 
-  const lastWeight = weightData.length
-    ? weightData[weightData.length - 1].v
-    : START_KG;
-
-  const pct     = progressPct(lastWeight, START_KG, TARGET_KG);
+  const lastWeight = weightData.length ? weightData[weightData.length - 1].v : START_KG;
+  const pct = progressPct(lastWeight, START_KG, TARGET_KG);
   const weekNum = getWeekNumber();
   const todayIdx = getTodayIdx();
   const isTrainingDay = TRAINING_DAYS.includes(todayIdx);
@@ -181,56 +139,59 @@ export default function Dashboard({ onNavigate }) {
   };
 
   return (
-    <div className="page">
+    <div className="max-w-[480px] mx-auto px-4 pt-6 pb-24 animate-fade-up">
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <p className="page-subtitle">Semaine {weekNum} · {new Date().toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long" })}</p>
-        <h1 className="page-title">Bonjour,<br /><span className="text-accent">Hugo.</span></h1>
+      <div className="mb-7">
+        <p className="font-mono text-xs text-neutral-500 tracking-wide uppercase mb-1">
+          Semaine {weekNum} · {new Date().toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long" })}
+        </p>
+        <h1 className="font-serif text-3xl leading-none tracking-tight">
+          Bonjour,<br /><span className="text-green-500">Hugo.</span>
+        </h1>
       </div>
 
       {/* Poids + objectif */}
-      <div className="section-label">Prise de masse</div>
-      <div className="card card-accent">
+      <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase mb-2">Prise de masse</div>
+      <div className="bg-neutral-0 border-2 border-green-500 rounded-2xl p-4 shadow-[0_0_24px_rgba(90,143,77,0.08)]">
         <div className="flex items-center justify-between">
           <div>
-            <div className="stat-label">Poids actuel</div>
-            <div className="stat-value accent">
+            <div className="font-mono text-xs text-neutral-500 uppercase tracking-wide mb-1.5">Poids actuel</div>
+            <div className="font-serif text-4xl leading-none tracking-tight text-green-500">
               {lastWeight}
-              <span className="stat-unit">kg</span>
+              <span className="font-mono text-sm text-neutral-500 ml-1">kg</span>
             </div>
-            <div className="stat-sub text-muted">
+            <div className="text-sm text-neutral-500 mt-1">
               + {(lastWeight - START_KG).toFixed(1)} kg depuis le début
             </div>
           </div>
-          <div style={{ textAlign:"right" }}>
-            <div className="stat-label">Objectif</div>
-            <div className="stat-value" style={{ fontSize:"1.5rem" }}>
+          <div className="text-right">
+            <div className="font-mono text-xs text-neutral-500 uppercase tracking-wide mb-1.5">Objectif</div>
+            <div className="font-serif text-2xl">
               {TARGET_KG}
-              <span className="stat-unit">kg</span>
+              <span className="font-mono text-sm text-neutral-500 ml-1">kg</span>
             </div>
-            <div className="stat-sub text-muted">dans 12 mois</div>
+            <div className="text-sm text-neutral-500 mt-1">dans 12 mois</div>
           </div>
         </div>
-        <div className="progress-track" style={{ marginTop: 14 }}>
-          <div className="progress-fill" style={{ width: `${pct}%` }} />
+
+        <div className="h-1 bg-neutral-200 rounded-full overflow-hidden mt-4">
+          <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
         </div>
-        <div className="flex justify-between mt-sm">
-          <span className="text-mono text-muted" style={{ fontSize:"0.65rem" }}>54 kg</span>
-          <span className="text-mono text-accent" style={{ fontSize:"0.65rem" }}>{pct}% atteint</span>
-          <span className="text-mono text-muted" style={{ fontSize:"0.65rem" }}>60 kg</span>
+        <div className="flex justify-between mt-2">
+          <span className="font-mono text-xs text-neutral-500">54 kg</span>
+          <span className="font-mono text-xs text-green-500">{pct}% atteint</span>
+          <span className="font-mono text-xs text-neutral-500">60 kg</span>
         </div>
 
-        {/* Mini sparkline */}
         {weightData.length >= 2 && (
-          <div style={{ marginTop: 16 }}>
-            <div className="section-label" style={{ marginBottom: 6 }}>Courbe réelle</div>
+          <div className="mt-4">
+            <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase mb-1.5">Courbe réelle</div>
             <Sparkline data={weightData} target={TARGET_KG} />
           </div>
         )}
 
         <button
-          className="btn btn-primary"
-          style={{ marginTop: 14 }}
+          className="w-full flex items-center justify-center gap-2 min-h-touch px-6 rounded-lg font-serif text-sm tracking-wide bg-green-500 text-white active:scale-[0.97] active:bg-green-700 transition-all mt-4"
           onClick={() => onNavigate("journal")}
         >
           + Saisir le poids du jour
@@ -238,30 +199,30 @@ export default function Dashboard({ onNavigate }) {
       </div>
 
       {/* Fenêtre IF */}
-      <div className="card" style={{ marginTop: 12 }}>
-        <div className="section-label">Jeûne intermittent</div>
-        <div className="if-block">
-          <div className="if-clock">
+      <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mt-3">
+        <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase mb-2">Jeûne intermittent</div>
+        <div className="flex items-center gap-3.5">
+          <div className="font-serif text-4xl leading-none text-amber-500 flex-shrink-0">
             {ifStatus.inWindow ? "▶" : "◷"}
           </div>
-          <div className="if-info">
-            <div className="if-status">
+          <div className="flex-1">
+            <div className="font-mono text-xs text-neutral-500 uppercase tracking-wide mb-0.5">
               {ifStatus.inWindow ? "Fenêtre alimentaire ouverte" : "Phase de jeûne"}
             </div>
-            <div className="if-window">
+            <div className="text-base font-medium">
               {ifStatus.inWindow
                 ? `Ferme dans ${ifStatus.remH}h${ifStatus.remM.toString().padStart(2,"0")}`
                 : `Ouvre dans ${ifStatus.remH}h${ifStatus.remM.toString().padStart(2,"0")}`
               }
             </div>
-            <div className="stat-sub text-muted" style={{ marginTop: 2 }}>
+            <div className="text-sm text-neutral-500 mt-0.5">
               Fenêtre : 12h00 – 18h00 · 2 350 kcal
             </div>
           </div>
         </div>
-        <div className="progress-track" style={{ marginTop: 12 }}>
+        <div className="h-1 bg-neutral-200 rounded-full overflow-hidden mt-3">
           <div
-            className="progress-fill amber"
+            className="h-full bg-amber-500 rounded-full transition-all duration-500"
             style={{
               width: `${Math.min(100, ((ifStatus.h - IF_START) / (IF_END - IF_START)) * 100)}%`,
               opacity: ifStatus.inWindow ? 1 : 0.3,
@@ -271,81 +232,72 @@ export default function Dashboard({ onNavigate }) {
       </div>
 
       {/* Hydratation */}
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mt-3">
         <div className="flex items-center justify-between">
-          <div className="section-label" style={{ marginBottom: 0 }}>Hydratation</div>
-          <span className="stat-value cyan" style={{ fontSize:"1.4rem" }}>
+          <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase">Hydratation</div>
+          <span className="font-serif text-2xl" style={{ color: "var(--color-info-500)" }}>
             {hydro.count}
-            <span className="stat-unit">/ {HYDRO_GOAL}</span>
+            <span className="font-mono text-sm text-neutral-500 ml-1">/ {HYDRO_GOAL}</span>
           </span>
         </div>
-        <div className="hydro-dots">
+        <div className="flex gap-1.5 mt-3 flex-wrap">
           {Array.from({ length: HYDRO_GOAL }).map((_, i) => (
             <button
               key={i}
-              className={`hydro-dot ${i < hydro.count ? "filled" : ""}`}
               onClick={() => toggleHydro(i)}
               aria-label={`Verre ${i + 1}`}
+              className={`w-7 h-7 rounded-full border-[1.5px] transition-all active:scale-90 ${
+                i < hydro.count
+                  ? "border-transparent"
+                  : "border-neutral-200 bg-transparent"
+              }`}
+              style={i < hydro.count ? { background: "var(--color-info-500)", borderColor: "var(--color-info-500)" } : undefined}
             />
           ))}
         </div>
-        <div className="progress-track" style={{ marginTop: 10 }}>
-          <div className="progress-fill cyan" style={{ width: `${(hydro.count / HYDRO_GOAL) * 100}%` }} />
+        <div className="h-1 bg-neutral-200 rounded-full overflow-hidden mt-2.5">
+          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(hydro.count / HYDRO_GOAL) * 100}%`, background: "var(--color-info-500)" }} />
         </div>
-        <div className="text-muted" style={{ marginTop: 6, fontSize:"0.75rem" }}>
+        <div className="text-sm text-neutral-500 mt-1.5">
           {hydro.count * 250} ml · objectif 2 000 ml
         </div>
       </div>
 
       {/* Semaine d'entraînement */}
-      <div className="card" style={{ marginTop: 12 }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
-          <div className="section-label" style={{ marginBottom: 0 }}>Semaine d'entraînement</div>
-          <span
-            style={{
-              background: isTrainingDay ? "var(--accent-muted)" : "var(--surface-2)",
-              color: isTrainingDay ? "var(--accent)" : "var(--text-3)",
-              border: `1px solid ${isTrainingDay ? "var(--accent)" : "var(--border)"}`,
-              borderRadius: 6,
-              padding: "2px 8px",
-              fontFamily: "var(--font-mono)",
-              fontSize: "0.65rem",
-              letterSpacing: "0.06em",
-            }}
-          >
+      <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4 mt-3">
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-mono text-xs text-neutral-500 tracking-wider uppercase">Semaine d'entraînement</div>
+          <span className={`rounded-md px-2 py-0.5 font-mono text-xs tracking-wide border ${
+            isTrainingDay
+              ? "bg-green-50 text-green-500 border-green-500"
+              : "bg-neutral-100 text-neutral-500 border-neutral-200"
+          }`}>
             {isTrainingDay ? `▶ ${todayLabel(todayIdx)}` : "REPOS"}
           </span>
         </div>
-        <div className="week-grid">
+        <div className="grid grid-cols-7 gap-1.5">
           {WEEK_DAYS.map((day, i) => {
             const isTrain = TRAINING_DAYS.includes(i);
             const isToday = i === todayIdx;
             return (
-              <div key={i} className="week-day">
-                <span className="week-day-label">{day}</span>
-                <div
-                  className={`week-day-dot ${isTrain ? "training" : "rest"} ${isToday ? "today" : ""}`}
-                >
-                  {isTrain
-                    ? ["P", "T", "—", "L", "F", "—", "—"][i]
-                    : "·"
-                  }
+              <div key={i} className="flex flex-col items-center gap-1">
+                <span className="font-mono text-[0.58rem] text-neutral-500 uppercase tracking-wide">{day}</span>
+                <div className={`w-8 h-8 rounded-lg border flex items-center justify-center text-xs transition-all ${
+                  isTrain
+                    ? "bg-green-50 border-green-500 text-green-500 font-bold"
+                    : "bg-neutral-100 border-neutral-200 text-neutral-500"
+                } ${isToday ? "ring-2 ring-green-500" : ""}`}>
+                  {isTrain ? ["P", "T", "—", "L", "F", "—", "—"][i] : "·"}
                 </div>
               </div>
             );
           })}
         </div>
-        <div className="flex justify-between mt-sm" style={{ marginTop: 10 }}>
-          <span className="text-muted text-mono" style={{ fontSize:"0.65rem" }}>P=Push T=Pull L=Legs F=Full Body</span>
+        <div className="flex justify-between mt-2.5">
+          <span className="font-mono text-xs text-neutral-500">P=Push T=Pull L=Legs F=Full Body</span>
         </div>
         <button
-          className="btn"
-          style={{
-            marginTop: 12,
-            background: "var(--surface-2)",
-            color: "var(--text)",
-            border: "1px solid var(--border-2)",
-          }}
+          className="w-full flex items-center justify-center gap-2 min-h-touch px-6 rounded-lg font-serif text-sm tracking-wide bg-neutral-100 text-neutral-900 border border-neutral-200 active:scale-[0.97] transition-all mt-3"
           onClick={() => onNavigate("training")}
         >
           Voir le protocole complet →
@@ -353,29 +305,28 @@ export default function Dashboard({ onNavigate }) {
       </div>
 
       {/* Calories macro rapide */}
-      <div className="card-row" style={{ marginTop: 12 }}>
-        <div className="card">
-          <div className="stat-label">Calories</div>
-          <div className="stat-value amber" style={{ fontSize:"1.5rem" }}>2 350</div>
-          <div className="stat-sub text-muted">kcal / jour</div>
+      <div className="grid grid-cols-2 gap-3 mt-3">
+        <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4">
+          <div className="font-mono text-xs text-neutral-500 uppercase tracking-wide mb-1.5">Calories</div>
+          <div className="font-serif text-2xl text-amber-500">2 350</div>
+          <div className="text-sm text-neutral-500 mt-1">kcal / jour</div>
         </div>
-        <div className="card">
-          <div className="stat-label">Protéines</div>
-          <div className="stat-value" style={{ fontSize:"1.5rem", color:"var(--accent-2)" }}>160</div>
-          <div className="stat-sub text-muted">g / jour · 3g/kg</div>
+        <div className="bg-neutral-0 border border-neutral-200 rounded-2xl p-4">
+          <div className="font-mono text-xs text-neutral-500 uppercase tracking-wide mb-1.5">Protéines</div>
+          <div className="font-serif text-2xl" style={{ color: "var(--color-info-500)" }}>160</div>
+          <div className="text-sm text-neutral-500 mt-1">g / jour · 3g/kg</div>
         </div>
       </div>
 
-      <div style={{ marginTop: 12, marginBottom: 24, display:"flex", flexDirection:"column", gap: 8 }}>
+      <div className="mt-3 mb-6 flex flex-col gap-2">
         <button
-          className="btn btn-primary"
+          className="w-full flex items-center justify-center gap-2 min-h-touch px-6 rounded-lg font-serif text-sm tracking-wide bg-green-500 text-white active:scale-[0.97] active:bg-green-700 transition-all"
           onClick={() => onNavigate("macros")}
         >
           ◈ Macros du jour — cocher mes repas
         </button>
         <button
-          className="btn"
-          style={{ background: "var(--surface)", border: "1px solid var(--border-2)", color: "var(--text)" }}
+          className="w-full flex items-center justify-center gap-2 min-h-touch px-6 rounded-lg font-serif text-sm tracking-wide bg-neutral-0 border border-neutral-200 text-neutral-900 active:scale-[0.97] transition-all"
           onClick={() => onNavigate("food")}
         >
           Voir le plan alimentaire →
