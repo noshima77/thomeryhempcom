@@ -1,0 +1,10 @@
+{
+  "name": "@thomeryhemp/pocketbase",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "dependencies": {
+    "pocketbase": "^0.27.0"
+  }
+}

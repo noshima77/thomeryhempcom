@@ -47,6 +47,18 @@ importers:
         specifier: ^8.0.8
         version: 8.1.2
 
+  packages/i18n:
+    dependencies:
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+
+  packages/pocketbase:
+    dependencies:
+      pocketbase:
+        specifier: ^0.27.0
+        version: 0.27.0
+
   packages/ui:
     dependencies:
       react:
@@ -382,6 +394,9 @@ packages:
   picomatch@4.0.4:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
+
+  pocketbase@0.27.0:
+    resolution: {integrity: sha512-K5N6d93UP/BNMbMnlZ6BUfy9VPCIvLyqhJFOsNI8OsZwzvKWEAfyD36boi5K4ECIOl5HMlo0TzuaeGdKpMwizQ==}
 
   postcss@8.5.16:
     resolution: {integrity: sha512-vuwillviilfKZsg0VGj5R/YwwcHx4SLsIOI/7K6mQkWx+l5cUHTjj5g0AasTBcyXsbfTgrwsUNmVUb5xVwyPwg==}
@@ -731,6 +746,8 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.4: {}
+
+  pocketbase@0.27.0: {}
 
   postcss@8.5.16:
     dependencies:
