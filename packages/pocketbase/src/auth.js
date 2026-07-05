@@ -28,3 +28,12 @@ export function onAuthChange(callback) {
   const pb = getPocketBase();
   return pb.authStore.onChange(callback, true);
 }
+
+/**
+ * Authentification superuser/admin PocketBase (ex-"admins", renommé _superusers depuis PB 0.23+).
+ * Utilisé par les apps qui gèrent des données globales (ex: grow) plutôt que des comptes utilisateurs.
+ */
+export async function loginSuperuser(email, password) {
+  const pb = getPocketBase();
+  return pb.collection('_superusers').authWithPassword(email, password);
+}
