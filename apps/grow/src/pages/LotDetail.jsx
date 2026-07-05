@@ -28,9 +28,9 @@ export default function LotDetail({ id, navigate }) {
   }, [id]);
 
   if (!lot) return (
-    <div className="not-found">
-      <p>Lot introuvable.</p>
-      <button className="btn" onClick={() => navigate("dashboard")}>← Retour</button>
+    <div className="text-center py-16">
+      <p className="text-neutral-500 mb-4">Lot introuvable.</p>
+      <button className="px-4 py-2 rounded-lg border-[1.5px] border-neutral-200 text-sm" onClick={() => navigate("dashboard")}>← Retour</button>
     </div>
   );
 
@@ -73,44 +73,54 @@ export default function LotDetail({ id, navigate }) {
     navigate("dashboard");
   };
 
+  const btnSm = "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-neutral-0 border-[1.5px] border-neutral-200 hover:border-green-500 hover:bg-green-50 transition-all";
+
   return (
-    <div className="lot-detail">
+    <div>
       {/* Header */}
-      <div className="lot-header">
-        <button className="back-btn" onClick={() => navigate("dashboard")}>← Retour</button>
-        <div className="lot-title-row">
+      <div className="bg-neutral-0 border-[1.5px] border-neutral-200 rounded-2xl p-5 mb-5 shadow-sm">
+        <button className="text-sm text-neutral-500 hover:text-green-700 mb-3 inline-flex items-center gap-1 py-1.5" onClick={() => navigate("dashboard")}>
+          ← Retour
+        </button>
+        <div className="flex justify-between items-start gap-3 mb-4 flex-wrap">
           <div>
-            <h1 className="lot-name">{lot.nom}</h1>
-            <p className="lot-meta">{lot.variete} · {lot.nb_graines} graine{lot.nb_graines > 1 ? "s" : ""} · Lancé le {new Date(lot.date_lancement).toLocaleDateString("fr-FR")}</p>
+            <h1 className="font-serif text-2xl font-extrabold">{lot.nom}</h1>
+            <p className="text-[0.8rem] text-neutral-500 mt-0.5">
+              {lot.variete} · {lot.nb_graines} graine{lot.nb_graines > 1 ? "s" : ""} · Lancé le {new Date(lot.date_lancement).toLocaleDateString("fr-FR")}
+            </p>
           </div>
-          <div className="lot-actions">
-            <button className="btn btn-sm" onClick={() => exportLotCSV(lot, journal)}>↓ CSV</button>
-            <button className="btn btn-sm" onClick={() => exportLotPDF(lot, journal, photos)}>↓ PDF</button>
-            <button className="btn btn-sm btn-danger" onClick={handleDelete}>Supprimer</button>
+          <div className="flex gap-1.5 flex-wrap justify-end">
+            <button className={btnSm} onClick={() => exportLotCSV(lot, journal)}>↓ CSV</button>
+            <button className={btnSm} onClick={() => exportLotPDF(lot, journal, photos)}>↓ PDF</button>
+            <button className={`${btnSm} text-error border-red-200 hover:bg-red-50 hover:border-red-200`} onClick={handleDelete}>Supprimer</button>
           </div>
         </div>
 
         {/* Day counter + progress */}
-        <div className="lot-stats">
-          <div className="day-badge">
-            <span className="day-number">J+{days}</span>
-            <span className="day-label">jours</span>
+        <div className="flex gap-4 items-center flex-col sm:flex-row">
+          <div className="flex sm:flex-col items-center sm:items-center gap-2 sm:gap-0 bg-green-900 text-white rounded-lg px-4 py-2.5 min-w-16 flex-shrink-0">
+            <span className="font-serif text-xl font-extrabold leading-none">J+{days}</span>
+            <span className="text-[0.68rem] opacity-70 tracking-wide">jours</span>
           </div>
-          <div className="stage-info">
-            <div className="stage-top">
-              <span className="stage-current">
-                {editingStatut ? (
-                  <select autoFocus className="stage-select" value={lot.statut} onChange={e => handleStatutChange(e.target.value)} onBlur={() => setEditingStatut(false)}>
-                    {STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                  </select>
-                ) : (
-                  <button className="stage-btn" onClick={() => setEditingStatut(true)}>
-                    <StatusBadge statut={lot.statut} /> ✎
-                  </button>
-                )}
-              </span>
+          <div className="flex-1 flex flex-col gap-2 w-full">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {editingStatut ? (
+                <select
+                  autoFocus
+                  className="text-sm px-2 py-1 rounded-md border-[1.5px] border-green-500"
+                  value={lot.statut}
+                  onChange={e => handleStatutChange(e.target.value)}
+                  onBlur={() => setEditingStatut(false)}
+                >
+                  {STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                </select>
+              ) : (
+                <button className="flex items-center gap-1.5" onClick={() => setEditingStatut(true)}>
+                  <StatusBadge statut={lot.statut} /> <span className="text-neutral-500 text-sm">✎</span>
+                </button>
+              )}
               {getNextStage(lot.statut) && (
-                <span className="stage-next">→ {getNextStage(lot.statut)}</span>
+                <span className="text-xs text-neutral-500">→ {getNextStage(lot.statut)}</span>
               )}
             </div>
             <ProgressBar value={progress} />
@@ -119,13 +129,19 @@ export default function LotDetail({ id, navigate }) {
       </div>
 
       {/* Tabs */}
-      <div className="tabs">
+      <div className="flex gap-0.5 mb-4 bg-neutral-0 border-[1.5px] border-neutral-200 rounded-2xl p-1">
         {[
           { id: "journal", label: `Journal (${journal.length})` },
           { id: "photos", label: `Photos (${photos.length})` },
           { id: "rappels", label: "Rappels" },
         ].map(tab => (
-          <button key={tab.id} className={`tab ${activeTab === tab.id ? "active" : ""}`} onClick={() => setActiveTab(tab.id)}>
+          <button
+            key={tab.id}
+            className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.id ? "bg-green-900 text-white" : "text-neutral-500 hover:bg-green-50 hover:text-neutral-900"
+            }`}
+            onClick={() => setActiveTab(tab.id)}
+          >
             {tab.label}
           </button>
         ))}
@@ -133,36 +149,47 @@ export default function LotDetail({ id, navigate }) {
 
       {/* Journal Tab */}
       {activeTab === "journal" && (
-        <div className="tab-content">
-          <form className="entry-form" onSubmit={handleAddEntry}>
-            <div className="entry-type-row">
-              {["observation", "arrosage", "alerte", "traitement"].map(t => (
-                <button key={t} type="button" className={`type-chip ${entryType === t ? "active" : ""}`} onClick={() => setEntryType(t)}>
-                  {t === "observation" ? "🔍" : t === "arrosage" ? "💧" : t === "alerte" ? "⚠️" : "🧪"} {t}
+        <div className="flex flex-col gap-3">
+          <form className="bg-neutral-0 border-[1.5px] border-neutral-200 rounded-2xl p-3.5 flex flex-col gap-2.5 shadow-sm" onSubmit={handleAddEntry}>
+            <div className="flex gap-1.5 flex-wrap">
+              {["observation", "arrosage", "alerte", "traitement", "emplacement"].map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border-[1.5px] transition-all ${
+                    entryType === t ? "bg-green-900 text-white border-green-900" : "bg-neutral-50 border-neutral-200 text-neutral-500"
+                  }`}
+                  onClick={() => setEntryType(t)}
+                >
+                  {t === "observation" ? "🔍" : t === "arrosage" ? "💧" : t === "alerte" ? "⚠️" : t === "traitement" ? "🧪" : "🪴"} {t}
                 </button>
               ))}
             </div>
-            <div className="entry-input-row">
+            <div className="flex gap-2 items-end">
               <textarea
-                className="entry-input"
+                className="flex-1 px-3 py-2.5 border-[1.5px] border-neutral-200 rounded-lg text-sm resize-none focus:outline-none focus:border-green-500 transition-colors"
                 value={newEntry}
                 onChange={e => setNewEntry(e.target.value)}
                 placeholder="Note libre... (ex: premières racines visibles, pH 6.2, arrosage 200ml)"
                 rows={2}
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleAddEntry(e); } }}
               />
-              <button className="btn btn-primary" type="submit">Ajouter</button>
+              <button className="min-h-touch px-4 rounded-lg text-sm font-medium bg-green-500 text-white hover:bg-green-300 transition-all" type="submit">
+                Ajouter
+              </button>
             </div>
           </form>
 
           {loadingJournal ? (
-            <div className="loading-list">{[1,2,3].map(i => <div key={i} className="skeleton skeleton-entry" />)}</div>
+            <div className="flex flex-col gap-2">
+              {[1,2,3].map(i => <div key={i} className="rounded-lg h-[72px] skeleton-shimmer" />)}
+            </div>
           ) : journal.length === 0 ? (
-            <div className="empty-journal">
+            <div className="text-center py-8 text-neutral-500 text-sm">
               <p>Aucune entrée pour l'instant. Commence à noter !</p>
             </div>
           ) : (
-            <div className="journal-list">
+            <div className="flex flex-col gap-2">
               {journal.map(entry => (
                 <JournalEntry key={entry.id} entry={entry} onDelete={() => handleDeleteEntry(entry.id)} />
               ))}
@@ -173,10 +200,13 @@ export default function LotDetail({ id, navigate }) {
 
       {/* Photos Tab */}
       {activeTab === "photos" && (
-        <div className="tab-content">
-          <div className="photo-upload-area" onClick={() => fileInputRef.current?.click()}>
+        <div className="flex flex-col gap-3">
+          <div
+            className="flex items-center justify-center gap-2.5 bg-neutral-0 border-2 border-dashed border-neutral-200 rounded-2xl p-6 cursor-pointer text-neutral-500 text-sm hover:border-green-500 hover:bg-green-50 transition-all"
+            onClick={() => fileInputRef.current?.click()}
+          >
             <input ref={fileInputRef} type="file" accept="image/*" capture="environment" hidden onChange={handlePhotoUpload} />
-            <span className="upload-icon">📷</span>
+            <span className="text-2xl">📷</span>
             <span>Ajouter une photo</span>
           </div>
           <PhotoGallery photos={photos} getPhotoUrl={getPhotoUrl} onDelete={handleDeletePhoto} />
@@ -185,30 +215,28 @@ export default function LotDetail({ id, navigate }) {
 
       {/* Rappels Tab */}
       {activeTab === "rappels" && (
-        <RappelsTab lotId={id} statut={lot.statut} days={days} />
+        <RappelsTab statut={lot.statut} days={days} />
       )}
     </div>
   );
 }
 
-function RappelsTab({ lotId, statut, days }) {
+function RappelsTab({ statut, days }) {
   const suggestions = getStageSuggestions(statut, days);
   return (
-    <div className="tab-content">
-      <div className="rappels-section">
-        <h3 className="section-label">Conseils pour ce stade</h3>
-        <ul className="suggestions-list">
-          {suggestions.map((s, i) => (
-            <li key={i} className="suggestion-item">
-              <span className="suggestion-icon">{s.icon}</span>
-              <div>
-                <strong>{s.titre}</strong>
-                <p>{s.detail}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div>
+      <h3 className="font-serif text-base font-bold mb-3">Conseils pour ce stade</h3>
+      <ul className="flex flex-col gap-2.5 list-none">
+        {suggestions.map((s, i) => (
+          <li key={i} className="flex gap-3 bg-neutral-0 border-[1.5px] border-neutral-200 rounded-lg p-3.5">
+            <span className="text-xl flex-shrink-0">{s.icon}</span>
+            <div>
+              <strong className="text-sm block mb-0.5">{s.titre}</strong>
+              <p className="text-[0.8rem] text-neutral-500">{s.detail}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

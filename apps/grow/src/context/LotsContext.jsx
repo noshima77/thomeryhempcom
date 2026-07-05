@@ -93,17 +93,17 @@ export function LotsProvider({ children }) {
   const getPhotos = (lotId) =>
     pb.collection("photos").getFullList({ filter: `lot_id="${lotId}"`, sort: "-created" });
 
-  const addPhoto = (lotId, file, legende = "") => {
+  const addPhoto = (lotId, photos, legende = "") => {
     const fd = new FormData();
     fd.append("lot_id", lotId);
-    fd.append("fichier", file);
+    fd.append("photos", photos);
     fd.append("legende", legende);
     return pb.collection("photos").create(fd);
   };
 
   const deletePhoto = (id) => pb.collection("photos").delete(id);
 
-  const getPhotoUrl = (record) => getFileUrl(record, record.fichier);
+  const getPhotoUrl = (record) => getFileUrl(record, record.photos);
 
   return (
     <LotsContext.Provider value={{
