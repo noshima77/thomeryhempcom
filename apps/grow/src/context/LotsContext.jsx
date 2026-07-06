@@ -103,7 +103,7 @@ export function LotsProvider({ children }) {
 
   const deletePhoto = (id) => pb.collection("photos").delete(id);
 
-  const getPhotoUrl = (record) => getFileUrl(record, record.photos);
+  const getPhotoUrl = (record) => getFileUrl(record, record.file);
 
   return (
     <LotsContext.Provider value={{
